@@ -1,0 +1,33 @@
+{
+  "name": "haruhanjang-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "test:e2e": "playwright test",
+    "check:gate-copy": "node scripts/check-gate-copy.mjs"
+  },
+  "dependencies": {
+    "idb": "^8.0.3",
+    "pinia": "^2.3.1",
+    "vue": "^3.5.43",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55",
+    "@types/node": "^26.6.4",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21",
+    "vite-plugin-pwa": "^0.21.2",
+    "vue-tsc": "^2.2.12",
+    "workbox-background-sync": "^7.4.1",
+    "workbox-precaching": "^7.4.1",
+    "workbox-routing": "^7.4.1",
+    "workbox-strategies": "^7.4.1"
+  }
+}

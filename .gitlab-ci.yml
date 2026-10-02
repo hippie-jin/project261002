@@ -1,0 +1,18 @@
+# Docker 미사용 파이프라인 (research R13). 러너는 Node 20 이 설치된 shell executor 를 전제로 한다.
+stages: [build, deploy]
+
+build:
+  stage: build
+  script:
+    - cd backend && npm ci && npm run typecheck && npm run build && cd ..
+    - cd frontend && npm ci && npm run build && cd ..
+  artifacts:
+    paths: [backend/dist, frontend/dist]
+
+deploy:
+  stage: deploy
+  when: manual
+  script:
+    - rsync -az --delete backend/dist/ "$DEPLOY_HOST:$DEPLOY_PATH/backend/dist/"
+    - rsync -az --delete frontend/dist/ "$DEPLOY_HOST:$DEPLOY_PATH/frontend/dist/"
+    - ssh "$DEPLOY_HOST" "cd $DEPLOY_PATH && pm2 reload deploy/ecosystem.config.cjs"

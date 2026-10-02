@@ -1,0 +1,897 @@
+openapi: 3.0.3
+info:
+  title: 하루한장 API
+  version: 0.1.0
+  description: |
+    사장님 PWA(S1~S8)와 기관 대시보드(S7)가 쓰는 REST API.
+    근거: spec.md FR-xxx, design/SD_01 IPO, SD_02 화면, SD_03 테이블·뷰.
+
+    공통 규칙
+    - 모든 경로는 `/api` 아래. 인증은 HttpOnly 쿠키(`hrh_session`, 서명 JWT).
+    - 날짜는 KST 기준 `YYYY-MM-DD`.
+    - 게이트 차단은 HTTP 409 + `GateBlocked` 본문. 화면은 `gate` 코드로 SD_02 §11-2 표준 문구를 고른다.
+    - 사장님 API는 로그인한 계정의 가게 데이터만 다룬다(FR-091). 경로에 store_id를 받지 않는다.
+    - 기관 API(`/api/org/*`)는 익명 집계 뷰만 조회한다(FR-076, research R7).
+    - 인가(RBAC): 각 경로의 권한은 data-model §7-2. 권한이 없으면 403 Forbidden, 게이트 차단은 409.
+servers:
+  - url: /api
+tags:
+  - name: auth
+  - name: onboarding
+  - name: store
+  - name: records
+  - name: rail
+  - name: alerts
+  - name: compare
+  - name: paid
+  - name: org
+  - name: push
+  - name: staff
+  - name: admin
+
+paths:
+  /auth/kakao/start:
+    get:
+      tags: [auth]
+      summary: 카카오 간편 로그인 시작 (리다이렉트)
+      responses:
+        '302': { description: '카카오 인가 페이지로 이동' }
+  /auth/kakao/callback:
+    get:
+      tags: [auth]
+      summary: 카카오 콜백. 기존 계정이면 로그인, 없으면 가입 대기 세션 발급
+      parameters:
+        - { in: query, name: code, required: true, schema: { type: string } }
+        - { in: query, name: state, required: true, schema: { type: string } }
+      responses:
+        '302': { description: '가입 대기면 /start(S1), 가입 완료면 /today(S2)' }
+  /auth/dev-login:
+    post:
+      tags: [auth]
+      summary: 개발 전용 로그인 (AUTH_DEV_LOGIN=1 일 때만 존재)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [devSubject], properties: { devSubject: { type: string } } }
+      responses:
+        '204': { description: '세션 발급' }
+        '404': { description: '운영 환경에서는 없음' }
+  /auth/logout:
+    post:
+      tags: [auth]
+      responses:
+        '204': { description: '세션 삭제' }
+  /me:
+    get:
+      tags: [auth]
+      summary: 현재 로그인 상태
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /onboarding/options:
+    get:
+      tags: [onboarding]
+      summary: S1 선택지 (동의 항목·업종·지역)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  consentItems: { type: array, items: { $ref: '#/components/schemas/ConsentItem' } }
+                  businessTypes: { type: array, items: { $ref: '#/components/schemas/CodeLabel' } }
+                  regions: { type: array, items: { $ref: '#/components/schemas/Region' } }
+  /onboarding:
+    post:
+      tags: [onboarding]
+      summary: 가입 완료 (P1 1.5) — 계정·동의·가게를 한 트랜잭션으로 저장
+      description: FR-011, FR-013, FR-016. 가입 대기 세션 필요.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OnboardingRequest' }
+      responses:
+        '201': { description: '가입 완료, 정식 세션 발급' }
+        '409': { $ref: '#/components/responses/GateBlocked' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /store:
+    get:
+      tags: [store]
+      summary: 내 가게 정보
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Store' }
+  /store/closed-days:
+    put:
+      tags: [store]
+      summary: 쉬는 요일 입력 (UC1 A2, UC3 A1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [daysOfWeek]
+              properties:
+                daysOfWeek: { type: array, items: { type: integer, minimum: 1, maximum: 7 }, description: '1=월 … 7=일. 빈 배열 = 쉬는 날 없음' }
+      responses:
+        '204': { description: '저장' }
+  /store/alert-settings:
+    patch:
+      tags: [store]
+      summary: 경보 수신 켜기·끄기 (UC6 A1, FR-053)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [pushEnabled], properties: { pushEnabled: { type: boolean } } }
+      responses:
+        '204': { description: '저장' }
+  /consents:
+    post:
+      tags: [store]
+      summary: 동의 사건 추가 (익명 참여 동의·철회, FR-017, FR-064)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [consentItemCode, agreed]
+              properties:
+                consentItemCode: { type: string, enum: [anon_stats] }
+                agreed: { type: boolean }
+      responses:
+        '201': { description: '기록' }
+  /account:
+    delete:
+      tags: [store]
+      summary: 탈퇴 — 계정과 모든 기록 즉시 삭제 (research R9, FR-093 잠정)
+      responses:
+        '204': { description: '삭제 완료, 세션 삭제' }
+
+  /records:
+    get:
+      tags: [records]
+      summary: 기간 기록 + 외부 환경 결합 (달력·기기 내 분석 입력, P3·P4)
+      parameters:
+        - { in: query, name: from, required: true, schema: { type: string, format: date } }
+        - { in: query, name: to, required: true, schema: { type: string, format: date } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/DailyRecord' } }
+  /records/{date}:
+    parameters:
+      - { in: path, name: date, required: true, schema: { type: string, format: date } }
+    get:
+      tags: [records]
+      summary: 그날의 한 장 (S4 4.3)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DailyRecord' }
+        '404': { description: '기록 안 한 날' }
+    put:
+      tags: [records]
+      summary: 기록 저장·갱신 (P2 2.5~2.6, UC2 A2·A3)
+      description: |
+        FR-020~029. 같은 날짜는 갱신(revision+1). 미래 날짜는 422.
+        외부 데이터 결합은 응답 후 비동기로 수행하며, 응답의 env 는 결합 전이면 needs_check.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecordInput' }
+      responses:
+        '200':
+          description: 저장됨
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DailyRecord' }
+        '409': { $ref: '#/components/responses/GateBlocked' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /records/months/{month}/summary:
+    get:
+      tags: [records]
+      summary: 월간 요약 (S4 4.4, v_store_month_summary)
+      parameters:
+        - { in: path, name: month, required: true, schema: { type: string, pattern: '^\d{4}-\d{2}$' } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recordedDays: { type: integer }
+                  goodDays: { type: integer }
+                  normalDays: { type: integer }
+                  badDays: { type: integer }
+                  topEvents: { type: array, items: { $ref: '#/components/schemas/CodeCount' } }
+
+  /rail:
+    get:
+      tags: [rail]
+      summary: 진행 레일 상태 (C2, v_store_rail)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Rail' }
+  /gates/g3:
+    get:
+      tags: [rail]
+      summary: 기간 분석 기준 판정 (fn_gate_g3) — S3 관점·S6 보고서 기간
+      parameters:
+        - { in: query, name: from, required: false, schema: { type: string, format: date } }
+        - { in: query, name: to, required: false, schema: { type: string, format: date } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pass: { type: boolean }
+                  recordCount: { type: integer }
+                  minRecords: { type: integer, nullable: true, description: '기준 미정이면 null (항상 pass=false)' }
+                  alertWindowDays: { type: integer, nullable: true, description: '경보 판정 기간(기기 내 판정 입력, T068)' }
+                  alertMinDecline: { type: number, nullable: true, description: '경보 하락 폭 기준(기기 내 판정 입력, T068)' }
+
+  /alerts:
+    get:
+      tags: [alerts]
+      parameters:
+        - { in: query, name: status, schema: { type: string, enum: [new, acknowledged] } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Alert' } }
+    post:
+      tags: [alerts]
+      summary: 경보 생성 (P2 2.9) — 기기 내 판정 결과 제출, 서버는 G3 재검증 후 저장·푸시
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlertInput' }
+      responses:
+        '201':
+          description: 생성
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Alert' }
+        '409': { $ref: '#/components/responses/GateBlocked' }
+  /alerts/{alertId}/ack:
+    post:
+      tags: [alerts]
+      summary: 경보 확인 (P3 3.2)
+      parameters:
+        - { in: path, name: alertId, required: true, schema: { type: integer } }
+      responses:
+        '204': { description: '확인함' }
+
+  /compare:
+    get:
+      tags: [compare]
+      summary: 동네 흐름 비교 (P5, v_anon_cell) — 내 지역·업종 고정
+      parameters:
+        - { in: query, name: period, required: true, schema: { type: string, enum: [this_week, this_month] } }
+        - { in: query, name: dim, required: true, schema: { type: string, enum: [overall, dow, weather] } }
+      responses:
+        '200':
+          description: 공개 가능한 칸 (가게 수·순위 없음)
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/AnonCell' } }
+        '409': { $ref: '#/components/responses/GateBlocked' }
+
+  /paid/entitlements:
+    get:
+      tags: [paid]
+      responses:
+        '200':
+          description: 기능별 권한 (v_gate_g6_store)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    featureCode: { type: string, enum: [report, backup_export] }
+                    validUntil: { type: string, format: date, nullable: true }
+  /paid/payments:
+    post:
+      tags: [paid]
+      summary: 결제 시도 기록 (P6 6.3) — 공급자 미정, 개발은 모의 공급자
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [featureCode, providerResult]
+              properties:
+                featureCode: { type: string, enum: [report, backup_export] }
+                providerResult: { type: object, description: 공급자별 결과 페이로드 }
+      responses:
+        '201': { description: '성공 — 권한 생성' }
+        '409': { $ref: '#/components/responses/GateBlocked' }
+  /paid/exports:
+    post:
+      tags: [paid]
+      summary: 보고서·내보내기 생성 (P6 6.4) — 클라이언트 계산 스냅숏 제출, 서버는 G6·G3 재검증
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExportInput' }
+      responses:
+        '201':
+          description: generated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Export' }
+        '409': { $ref: '#/components/responses/GateBlocked' }
+  /paid/exports/{exportId}/confirm:
+    post:
+      tags: [paid]
+      summary: 포함 정보 확인 (G7 해제)
+      parameters:
+        - { in: path, name: exportId, required: true, schema: { type: integer } }
+      responses:
+        '204': { description: 'confirmed_at 기록' }
+  /paid/exports/{exportId}/file:
+    get:
+      tags: [paid]
+      summary: 파일 받기 — confirmed 가 아니면 409 G7, 성공 시 delivered 로 전환
+      parameters:
+        - { in: path, name: exportId, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: '파일 본문' }
+        '409': { $ref: '#/components/responses/GateBlocked' }
+  /paid/exports/{exportId}/decline:
+    post:
+      tags: [paid]
+      parameters:
+        - { in: path, name: exportId, required: true, schema: { type: integer } }
+      responses:
+        '204': { description: 'declined' }
+
+  /org/auth/login:
+    post:
+      tags: [org]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [loginId, password], properties: { loginId: { type: string }, password: { type: string } } }
+      responses:
+        '204': { description: '기관 세션 발급' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /org/me:
+    get:
+      tags: [org]
+      summary: 기관명·관할 지역·계약 판정 (v_gate_g8_org)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orgName: { type: string }
+                  contractValid: { type: boolean }
+                  jurisdiction: { type: array, items: { $ref: '#/components/schemas/Region' } }
+  /org/trends:
+    get:
+      tags: [org]
+      summary: 지역×업종 익명 경향 (P7 7.2·7.3) — 조회 이력 기록(org_query_log)
+      parameters:
+        - { in: query, name: region, required: true, schema: { type: string } }
+        - { in: query, name: businessType, required: false, schema: { type: string }, description: 생략 시 업종 전체 }
+        - { in: query, name: from, required: true, schema: { type: string, format: date } }
+        - { in: query, name: to, required: true, schema: { type: string, format: date } }
+        - { in: query, name: dim, required: true, schema: { type: string, enum: [overall, dow, weather, local_event] } }
+      responses:
+        '200':
+          description: 공개 칸 + 표시 불가 칸 목록
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cells: { type: array, items: { $ref: '#/components/schemas/AnonCell' } }
+                  suppressed:
+                    type: array
+                    description: '표시 불가 - 표본 부족 칸의 지역·업종 (수치 없음)'
+                    items: { type: object, properties: { regionCode: { type: string }, businessTypeCode: { type: string } } }
+        '409': { $ref: '#/components/responses/GateBlocked' }
+  /org/problems:
+    get:
+      tags: [org]
+      summary: 반복 운영 문제 익명 비율 (P7 7.4, v_anon_problem_cell)
+      parameters:
+        - { in: query, name: region, required: true, schema: { type: string } }
+        - { in: query, name: businessType, required: false, schema: { type: string } }
+        - { in: query, name: from, required: true, schema: { type: string, format: date } }
+        - { in: query, name: to, required: true, schema: { type: string, format: date } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    regionCode: { type: string }
+                    businessTypeCode: { type: string }
+                    weekStart: { type: string, format: date }
+                    eventTypeCode: { type: string }
+                    problemRatio: { type: number }
+        '409': { $ref: '#/components/responses/GateBlocked' }
+
+  /push/subscriptions:
+    post:
+      tags: [push]
+      summary: Web Push 구독 등록 (research R6)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endpoint, keys]
+              properties:
+                endpoint: { type: string }
+                keys: { type: object, required: [p256dh, auth], properties: { p256dh: { type: string }, auth: { type: string } } }
+      responses:
+        '201': { description: '등록' }
+    delete:
+      tags: [push]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [endpoint], properties: { endpoint: { type: string } } }
+      responses:
+        '204': { description: '해제' }
+
+  /staff/auth/login:
+    post:
+      tags: [staff]
+      summary: 운영 인력 로그인 (아이디별 5회 실패 시 15분 잠금)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [loginId, password], properties: { loginId: { type: string }, password: { type: string } } }
+      responses:
+        '204': { description: 'staff 세션 발급' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '423': { description: '잠금 중' }
+  /session/permissions:
+    get:
+      tags: [staff]
+      summary: 현재 주체의 종류·역할·권한 (화면 메뉴 표시용, 모든 주체 공통)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PrincipalPermissions' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /admin/thresholds:
+    get:
+      tags: [admin]
+      summary: 기준값 목록 (권한 threshold.manage)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Threshold' } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/thresholds/{key}:
+    put:
+      tags: [admin]
+      summary: 기준값 설정·비우기 (권한 threshold.manage). null 이면 해당 게이트 차단
+      parameters:
+        - { in: path, name: key, required: true, schema: { type: string, enum: [g3_min_records, g5_min_stores, alert_window_days, alert_min_decline] } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [value], properties: { value: { type: number, nullable: true, minimum: 0 } } }
+      responses:
+        '204': { description: '저장' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/codes/{codeKind}:
+    parameters:
+      - { in: path, name: codeKind, required: true, schema: { type: string, enum: [regions, business-types, sales-bands] } }
+    get:
+      tags: [admin]
+      summary: 코드 목록 (권한 code.read)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { type: object, additionalProperties: true } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [admin]
+      summary: 코드 추가·수정 (권한 code.manage). 사용 중인 코드 삭제는 제공하지 않음
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '204': { description: '저장' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/orgs:
+    get:
+      tags: [admin]
+      summary: 기관 목록·계약 상태 (권한 org.manage)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/OrgSummary' } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [admin]
+      summary: 기관 등록 (권한 org.manage)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [orgName, jurisdiction], properties: { orgName: { type: string }, jurisdiction: { type: array, items: { type: string } } } }
+      responses:
+        '201': { description: '등록' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/orgs/{orgId}/contract:
+    patch:
+      tags: [admin]
+      summary: 계약 상태·만료일 변경 (권한 contract.manage) — G8 해제 경로
+      parameters:
+        - { in: path, name: orgId, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [status], properties: { status: { type: string, enum: [active, expired] }, endDate: { type: string, format: date, nullable: true } } }
+      responses:
+        '204': { description: '저장' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/orgs/{orgId}/jurisdiction:
+    put:
+      tags: [admin]
+      summary: 관할 지역 교체 (권한 org.manage)
+      parameters:
+        - { in: path, name: orgId, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [regionCodes], properties: { regionCodes: { type: array, items: { type: string } } } }
+      responses:
+        '204': { description: '저장' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/orgs/{orgId}/accounts:
+    post:
+      tags: [admin]
+      summary: 기관 계정 발급 (권한 org.manage) — 임시 비밀번호는 응답으로 한 번만 반환
+      parameters:
+        - { in: path, name: orgId, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [loginId], properties: { loginId: { type: string } } }
+      responses:
+        '201':
+          description: '발급, org_viewer 역할 자동 부여'
+          content:
+            application/json:
+              schema: { type: object, properties: { orgAccountId: { type: integer }, temporaryPassword: { type: string } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/audit/{auditKind}:
+    get:
+      tags: [admin]
+      summary: 감사 이력 (권한 audit.read). 개별 사장님 기록은 포함하지 않음
+      parameters:
+        - { in: path, name: auditKind, required: true, schema: { type: string, enum: [gate-events, exports, org-queries, anon-cells, rbac-grants] } }
+        - { in: query, name: from, schema: { type: string, format: date } }
+        - { in: query, name: to, schema: { type: string, format: date } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { type: object, additionalProperties: true } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/staff:
+    get:
+      tags: [admin]
+      summary: 운영 인력 목록·역할 (권한 role.manage)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/StaffSummary' } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [admin]
+      summary: 운영 인력 계정 생성 (권한 role.manage)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [loginId, displayName, roles], properties: { loginId: { type: string }, displayName: { type: string }, roles: { type: array, items: { type: string, enum: [data_manager, operator, auditor, admin] } } } }
+      responses:
+        '201':
+          description: '생성, 임시 비밀번호 1회 반환'
+          content:
+            application/json:
+              schema: { type: object, properties: { staffAccountId: { type: integer }, temporaryPassword: { type: string } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/staff/{staffId}:
+    patch:
+      tags: [admin]
+      summary: 역할 교체·비활성화 (권한 role.manage). 마지막 admin 회수·자기 admin 회수는 409
+      parameters:
+        - { in: path, name: staffId, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { roles: { type: array, items: { type: string, enum: [data_manager, operator, auditor, admin] } }, isActive: { type: boolean } } }
+      responses:
+        '204': { description: '저장, rbac_grant_event 기록' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { description: '마지막 admin 회수 또는 자기 admin 회수' }
+
+components:
+  responses:
+    Unauthorized:
+      description: 로그인 필요
+    Forbidden:
+      description: 권한 없음 (RBAC). 게이트 차단(409)과 구분한다
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string, example: forbidden }
+              permission: { type: string, example: threshold.manage }
+    ValidationError:
+      description: 입력 형식 오류 (화면에는 기술 용어 없이 표시, FR-083)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string, example: validation }
+              fields: { type: object, additionalProperties: { type: string } }
+    GateBlocked:
+      description: 게이트 차단 (SD_02 §11, SD_03 §13)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/GateBlocked' }
+  schemas:
+    PrincipalPermissions:
+      type: object
+      properties:
+        kind: { type: string, enum: [owner, org, staff] }
+        id: { type: integer }
+        roles: { type: array, items: { type: string } }
+        permissions: { type: array, items: { type: string } }
+    Threshold:
+      type: object
+      properties:
+        key: { type: string }
+        value: { type: number, nullable: true }
+        unitLabel: { type: string }
+        updatedAt: { type: string, format: date-time }
+    OrgSummary:
+      type: object
+      properties:
+        orgId: { type: integer }
+        orgName: { type: string }
+        contractStatus: { type: string, enum: [active, expired] }
+        contractEndDate: { type: string, format: date, nullable: true }
+        jurisdiction: { type: array, items: { type: string } }
+    StaffSummary:
+      type: object
+      properties:
+        staffAccountId: { type: integer }
+        loginId: { type: string }
+        displayName: { type: string }
+        isActive: { type: boolean }
+        roles: { type: array, items: { type: string } }
+    GateBlocked:
+      type: object
+      required: [gate, reasonKey, releasedBy]
+      properties:
+        gate: { type: string, enum: [G0, G1, G2, G3, G4, G5, G6, G7, G8] }
+        reasonKey: { type: string, description: 'SD_02 §11-2 표준 문구 키 (예: g3.reason)' }
+        releasedBy: { type: string, enum: [self, others], description: 'others 면 화면에 해제 버튼을 두지 않는다 (FR-002)' }
+        detail:
+          type: object
+          description: '문구 치환 값 (예: G3 recordCount, minRecords). 가게 수 등 익명성 수치는 넣지 않는다'
+          additionalProperties: true
+    Me:
+      type: object
+      properties:
+        status: { type: string, enum: [pending_onboarding, active] }
+        accountId: { type: integer }
+    ConsentItem:
+      type: object
+      properties:
+        code: { type: string, enum: [service, anon_stats] }
+        label: { type: string }
+        required: { type: boolean }
+    CodeLabel:
+      type: object
+      properties:
+        code: { type: string }
+        label: { type: string }
+    CodeCount:
+      type: object
+      properties:
+        code: { type: string }
+        count: { type: integer }
+    Region:
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+        parentCode: { type: string, nullable: true }
+    OnboardingRequest:
+      type: object
+      required: [consents, businessTypeCode, regionCode]
+      properties:
+        consents:
+          type: object
+          required: [service, anon_stats]
+          properties:
+            service: { type: boolean, description: 'false 면 409 G0, 아무것도 저장하지 않음' }
+            anon_stats: { type: boolean }
+        businessTypeCode: { type: string }
+        regionCode: { type: string }
+        closedDays:
+          type: array
+          nullable: true
+          description: 'null = 미입력 (closed_days_set_at NULL), [] = 쉬는 날 없음'
+          items: { type: integer, minimum: 1, maximum: 7 }
+    Store:
+      type: object
+      properties:
+        businessTypeCode: { type: string }
+        regionCode: { type: string }
+        closedDays: { type: array, nullable: true, items: { type: integer } }
+        alertPushEnabled: { type: boolean }
+        anonStatsAgreed: { type: boolean }
+    RecordInput:
+      type: object
+      required: [dayMood, customerLevel, eventTypeCodes]
+      properties:
+        dayMood: { type: string, enum: [good, normal, bad] }
+        customerLevel: { type: string, enum: [many, usual, few] }
+        eventTypeCodes:
+          type: array
+          uniqueItems: true
+          items: { type: string, enum: [rain, discount, new_menu, sns_post, group_guest, stock_out, staff_absent] }
+        salesBandCode: { type: string, nullable: true }
+        clientQueuedAt: { type: string, format: date-time, nullable: true, description: 오프라인 대기열에서 보낸 경우 }
+    EnvStatus:
+      type: object
+      properties:
+        weatherCode: { type: string, nullable: true }
+        weatherStatus: { type: string, enum: [ok, needs_check] }
+        isHoliday: { type: boolean, nullable: true }
+        holidayStatus: { type: string, enum: [ok, needs_check] }
+        localEventName: { type: string, nullable: true }
+        localEventStatus: { type: string, enum: [ok, needs_check] }
+    DailyRecord:
+      type: object
+      properties:
+        recordDate: { type: string, format: date }
+        dayMood: { type: string, enum: [good, normal, bad] }
+        customerLevel: { type: string, enum: [many, usual, few] }
+        eventTypeCodes: { type: array, items: { type: string } }
+        salesBandCode: { type: string, nullable: true }
+        dayOfWeek: { type: integer, minimum: 1, maximum: 7 }
+        revision: { type: integer }
+        env: { $ref: '#/components/schemas/EnvStatus' }
+    Rail:
+      type: object
+      properties:
+        todayRecorded: { type: boolean }
+        recordCount: { type: integer }
+        g3Pass: { type: boolean }
+        g4Pass: { type: boolean }
+        g5PassThisWeek: { type: boolean }
+    AlertInput:
+      type: object
+      required: [windowStart, windowEnd, trendCode, confidenceLevel]
+      properties:
+        windowStart: { type: string, format: date }
+        windowEnd: { type: string, format: date }
+        trendCode: { type: string, enum: [decline] }
+        confidenceLevel: { type: string, enum: [high, medium, low] }
+    Alert:
+      type: object
+      properties:
+        alertId: { type: integer }
+        windowStart: { type: string, format: date }
+        windowEnd: { type: string, format: date }
+        trendCode: { type: string }
+        confidenceLevel: { type: string, enum: [high, medium, low] }
+        displayChannel: { type: string, enum: [push, in_app] }
+        status: { type: string, enum: [new, acknowledged] }
+        createdAt: { type: string, format: date-time }
+    AnonCell:
+      type: object
+      description: 가게 ID·가게 수·순위 필드 없음 (BR-HRH-15·21)
+      properties:
+        regionCode: { type: string }
+        businessTypeCode: { type: string, description: "'*' = 업종 전체" }
+        weekStart: { type: string, format: date }
+        dimKind: { type: string, enum: [overall, dow, weather, local_event] }
+        dimValue: { type: string }
+        nRecords: { type: integer, description: 신뢰도 산출용 기록 수 (가게 수 아님) }
+        goodRatio: { type: number }
+        fewRatio: { type: number }
+    ExportInput:
+      type: object
+      required: [exportKind, recordCountSnapshot]
+      properties:
+        exportKind: { type: string, enum: [report, backup, export] }
+        periodStart: { type: string, format: date, nullable: true }
+        periodEnd: { type: string, format: date, nullable: true }
+        recordCountSnapshot: { type: integer, minimum: 0 }
+        confidenceSnapshot: { type: string, enum: [high, medium, low], nullable: true }
+        reportBody: { type: object, description: 클라이언트 분석 모듈이 만든 보고서 내용(경향 문장·수치) }
+    Export:
+      type: object
+      properties:
+        exportId: { type: integer }
+        exportKind: { type: string }
+        periodStart: { type: string, format: date, nullable: true }
+        periodEnd: { type: string, format: date, nullable: true }
+        recordCountSnapshot: { type: integer }
+        confidenceSnapshot: { type: string, nullable: true }
+        status: { type: string, enum: [generated, delivered, declined] }
+        includedItems: { type: array, items: { type: string }, description: 종류별 고정 목록 (G7 확인 화면) }

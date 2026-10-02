@@ -1,0 +1,64 @@
+/* design/스타일가이드-1.html §12 토큰 (DESIGN-clickhouse.md) — 밝은 화면 변형
+   - 노랑은 버튼·강조 면(fill)에만 쓴다. 흰 바탕 위 노랑 글씨는 읽히지 않으므로 글씨·선 강조는 ink
+   - 그림자 없음: 깊이는 canvas → surface-card → surface-elevated 배경 톤 차이로만
+   - 간격 토큰 이름은 기존 화면 레이아웃을 유지하려고 이전 스케일을 그대로 둔다 (값은 모두 4px 단위) */
+:root {
+  color-scheme: light;
+
+  /* color */
+  --primary: #faff69;
+  --primary-active: #e6eb52;
+  --primary-disabled: #f3f5c4;
+  --primary-soft: #fbffb0;
+  --on-primary: #0a0a0a;
+  --ink: #0a0a0a;
+  --body-strong: #1a1a1a;
+  --body: #333333;
+  --muted: #6b6b6b;
+  --muted-soft: #a3a3a3;
+  --hairline: #e5e5e5;
+  --hairline-strong: #d0d0d0;
+  --canvas: #ffffff;
+  --surface-soft: #fafaf8;
+  --surface-card: #f4f4f2;
+  --surface-elevated: #ffffff;
+  --success: #16a34a;
+  --warning: #d97706;
+  --error: #dc2626;
+  --info: #2563eb;
+  --scrim: rgba(0, 0, 0, 0.5);
+
+  /* 이전 토큰 이름 → 새 팔레트 별칭 */
+  --error-hover: #b91c1c;
+  --hairline-soft: var(--hairline);
+  --border-strong: var(--hairline-strong);
+  --surface-strong: var(--surface-elevated);
+  --legal-link: var(--info);
+
+  /* type */
+  --font: Inter, 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* radius — 알약(pill)은 배지에만 */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 12px;
+  --r-pill: 9999px;
+  --r-full: 9999px;
+
+  /* spacing */
+  --s-xxs: 2px;
+  --s-xs: 4px;
+  --s-sm: 8px;
+  --s-md: 12px;
+  --s-base: 16px;
+  --s-lg: 24px;
+  --s-xl: 32px;
+  --s-xxl: 48px;
+  --s-section: 64px;
+
+  /* elevation: 그림자 없음 */
+  --shadow: none;
+}

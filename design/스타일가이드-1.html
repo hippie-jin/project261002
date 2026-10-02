@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>하루한장 스타일가이드-1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+/* =========================================================
+   하루한장 디자인 토큰 — 출처: DESIGN-clickhouse.md (getdesign · clickhouse)
+   다크 전용 시스템: 라이트 모드 마케팅 서피스가 없음
+   ========================================================= */
+:root {
+  color-scheme: dark;
+  /* colors */
+  --primary: #faff69;
+  --primary-active: #e6eb52;
+  --primary-disabled: #3a3a1f;
+  --ink: #ffffff;
+  --body: #cccccc;
+  --body-strong: #e6e6e6;
+  --muted: #888888;
+  --muted-soft: #5a5a5a;
+  --hairline: #2a2a2a;
+  --hairline-strong: #3a3a3a;
+  --canvas: #0a0a0a;
+  --surface-soft: #121212;
+  --surface-card: #1a1a1a;
+  --surface-elevated: #242424;
+  --on-primary: #0a0a0a;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* type */
+  --font: Inter, 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* radius */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 9999px;
+
+  /* spacing */
+  --s-xxs: 4px;
+  --s-xs: 8px;
+  --s-sm: 12px;
+  --s-md: 16px;
+  --s-lg: 24px;
+  --s-xl: 32px;
+  --s-xxl: 48px;
+  --s-section: 96px;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--body);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+a { color: var(--primary); text-underline-offset: 3px; }
+code, .mono { font-family: var(--mono); font-size: 13px; }
+h1, h2, h3, h4 { color: var(--ink); }
+::selection { background: var(--primary); color: var(--on-primary); }
+
+/* ---------- 타이포 토큰 클래스 ---------- */
+.t-xl    { font-size: 72px; font-weight: 700; line-height: 1.05; letter-spacing: -2.5px; color: var(--ink); }
+.t-lg    { font-size: 56px; font-weight: 700; line-height: 1.1;  letter-spacing: -2px;   color: var(--ink); }
+.t-md    { font-size: 40px; font-weight: 700; line-height: 1.15; letter-spacing: -1.5px; color: var(--ink); }
+.t-sm    { font-size: 32px; font-weight: 700; line-height: 1.2;  letter-spacing: -1px;   color: var(--ink); }
+.t-title-lg { font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -.3px; color: var(--ink); }
+.t-title-md { font-size: 18px; font-weight: 600; line-height: 1.4; color: var(--ink); }
+.t-title-sm { font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--ink); }
+.t-stat  { font-size: 56px; font-weight: 700; line-height: 1;    letter-spacing: -1.5px; color: var(--primary); }
+.t-body-md { font-size: 16px; font-weight: 400; line-height: 1.55; }
+.t-body-sm { font-size: 14px; font-weight: 400; line-height: 1.55; }
+.t-caption { font-size: 13px; font-weight: 500; line-height: 1.4; }
+.t-eyebrow { font-size: 12px; font-weight: 600; line-height: 1.4; letter-spacing: 1.5px; text-transform: uppercase; }
+.t-code  { font-family: var(--mono); font-size: 14px; line-height: 1.55; }
+.muted { color: var(--muted); }
+.yellow { color: var(--primary); }
+
+/* ---------- 레이아웃 ---------- */
+.topnav { position: sticky; top: 0; z-index: 10; height: 64px; background: rgba(10,10,10,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--hairline); }
+.topnav .inner { max-width: 1280px; height: 100%; margin: 0 auto; padding: 0 var(--s-lg); display: flex; align-items: center; gap: var(--s-xl); }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 700; font-size: 17px; letter-spacing: -.3px; text-decoration: none; }
+.brand-mark { display: grid; grid-template-columns: repeat(4, 4px); gap: 2px; align-items: end; height: 20px; }
+.brand-mark i { background: var(--primary); width: 4px; }
+.navlinks { display: flex; gap: var(--s-lg); flex: 1; }
+.navlinks a { color: var(--body); font-size: 14px; font-weight: 500; text-decoration: none; }
+.navlinks a:hover { color: var(--ink); }
+.nav-right { display: flex; align-items: center; gap: var(--s-md); }
+
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--s-lg); }
+section { padding: var(--s-section) 0; }
+section.band-soft { background: var(--surface-soft); }
+.section-head { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s-xl); align-items: end; margin-bottom: var(--s-xxl); }
+.section-head h2 { margin: var(--s-sm) 0 0; font-size: 40px; font-weight: 700; line-height: 1.15; letter-spacing: -1.5px; }
+.section-head p { margin: 0; color: var(--body); }
+h3 { margin: var(--s-xxl) 0 var(--s-md); font-size: 18px; font-weight: 600; line-height: 1.4; }
+h3.first { margin-top: 0; }
+
+.grid { display: grid; gap: var(--s-md); }
+.g2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.g4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.label { display: block; margin-bottom: var(--s-xs); font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+
+/* 카드 서피스 */
+.card { background: var(--surface-card); border-radius: var(--r-lg); padding: var(--s-xl); }
+.card-sm { padding: var(--s-lg); }
+.card-line { background: transparent; border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-lg); }
+.card-yellow { background: var(--primary); color: var(--on-primary); border-radius: var(--r-lg); padding: var(--s-xl); }
+.card-yellow h4, .card-yellow .t-title-md, .card-yellow .t-title-lg, .card-yellow .t-sm { color: var(--on-primary); }
+.nested { background: var(--surface-elevated); border-radius: var(--r-md); padding: var(--s-md); }
+
+/* ---------- 히어로 ---------- */
+.hero { padding: var(--s-section) 0; border-bottom: 1px solid var(--hairline); }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s-xxl); align-items: center; }
+.hero h1 { margin: var(--s-md) 0 var(--s-lg); }
+.hero p { margin: 0 0 var(--s-xl); font-size: 18px; color: var(--body); max-width: 560px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--s-lg); margin-top: var(--s-xxl); padding-top: var(--s-xl); border-top: 1px solid var(--hairline); }
+.stats .t-caption { margin-top: var(--s-xs); color: var(--muted); }
+
+/* ---------- 코드 윈도우 ---------- */
+.code-win { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-lg); overflow: hidden; }
+.code-bar { display: flex; align-items: center; gap: 6px; padding: var(--s-sm) var(--s-md); border-bottom: 1px solid var(--hairline); }
+.code-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--hairline-strong); }
+.code-bar span { margin-left: var(--s-xs); font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.code-win pre { margin: 0; padding: var(--s-lg); overflow-x: auto; font-family: var(--mono); font-size: 14px; line-height: 1.7; color: var(--body); counter-reset: ln; }
+.code-win pre .ln { display: block; }
+.code-win pre .ln::before { counter-increment: ln; content: counter(ln); display: inline-block; width: 24px; margin-right: var(--s-md); text-align: right; color: var(--muted-soft); }
+.kw { color: var(--primary); }
+.fn { color: #8fb8ff; }
+.str { color: #b5e3a1; }
+.num { color: #f5c26b; }
+.cm { color: var(--muted-soft); }
+.code-status { display: flex; justify-content: space-between; padding: var(--s-xs) var(--s-md); border-top: 1px solid var(--hairline); font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.code-status b { color: var(--success); font-weight: 500; }
+
+/* ---------- 컬러 ---------- */
+.swatch { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-lg); overflow: hidden; padding: 0; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.swatch:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.swatch .chip { height: 88px; }
+.swatch .info { padding: var(--s-sm) var(--s-md) var(--s-md); }
+.swatch .name { color: var(--ink); font-size: 14px; font-weight: 600; }
+.swatch .hex { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.swatch .use { margin-top: var(--s-xxs); font-size: 13px; color: var(--muted); line-height: 1.4; }
+.ratio-bar { display: flex; height: 40px; border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--hairline); }
+.ratio-bar span { display: grid; place-items: center; font-size: 12px; font-weight: 600; }
+
+/* ---------- 표 ---------- */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: var(--s-sm) var(--s-xs); border-bottom: 1px solid var(--hairline); vertical-align: middle; }
+th { font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+td.mono { color: var(--muted); }
+
+/* 간격 · 라운드 */
+.space-row { display: flex; align-items: center; gap: var(--s-md); padding: 6px 0; }
+.space-row .tok { width: 96px; font-family: var(--mono); font-size: 13px; color: var(--ink); }
+.space-row .px { width: 48px; font-size: 13px; color: var(--muted); }
+.space-row .bar { height: 10px; background: var(--primary); border-radius: 2px; }
+.radius-box { height: 72px; background: var(--surface-elevated); border: 1px solid var(--hairline-strong); }
+
+/* ---------- 버튼 ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s-xs); height: 40px; padding: 12px 20px; border: 0; border-radius: var(--r-md); font: 600 14px/1 var(--font); cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
+.btn-primary:active, .btn-primary.is-active { background: var(--primary-active); }
+.btn-primary:disabled { background: var(--primary-disabled); color: var(--muted); cursor: not-allowed; }
+.btn-secondary { background: var(--surface-card); color: var(--ink); box-shadow: inset 0 0 0 1px var(--hairline-strong); }
+.btn-secondary:disabled { color: var(--muted-soft); cursor: not-allowed; }
+.btn-text { background: transparent; color: var(--ink); padding: 0 4px; }
+.btn-black { background: var(--canvas); color: var(--ink); }
+.btn-lg { height: 56px; font-size: 16px; padding: 0 24px; }
+.btn-block { width: 100%; }
+.icon-btn { width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--surface-card); color: var(--ink); display: inline-grid; place-items: center; cursor: pointer; font-size: 16px; }
+.stack { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-sm); }
+
+/* ---------- 배지 · 탭 ---------- */
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: var(--r-pill); background: var(--surface-card); color: var(--ink); font-size: 13px; font-weight: 500; line-height: 1.4; }
+.badge-yellow { background: var(--primary); color: var(--on-primary); font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+.badge-line { background: transparent; box-shadow: inset 0 0 0 1px var(--hairline-strong); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.tabs { display: inline-flex; gap: var(--s-xxs); padding: var(--s-xxs); background: var(--surface-soft); border: 1px solid var(--hairline); border-radius: var(--r-md); }
+.tab { padding: 8px 14px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--muted); font: 500 14px/1.4 var(--font); cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--surface-card); color: var(--ink); box-shadow: inset 0 0 0 1px var(--hairline-strong); }
+
+/* ---------- 기록 입력 ---------- */
+.choice-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xs); }
+.choice { min-height: 72px; padding: var(--s-sm); border-radius: var(--r-md); border: 1px solid var(--hairline-strong); background: var(--surface-elevated); color: var(--ink); font: 600 16px/1.3 var(--font); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.choice .sym { font-family: var(--mono); font-size: 18px; color: var(--muted); }
+.choice[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--on-primary); }
+.choice[aria-pressed="true"] .sym { color: var(--on-primary); }
+.chip-row { display: flex; flex-wrap: wrap; gap: var(--s-xs); }
+.chip { height: 40px; padding: 0 14px; border-radius: var(--r-md); border: 1px solid var(--hairline-strong); background: transparent; color: var(--body); font: 500 14px/1 var(--font); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--surface-elevated); border-color: var(--ink); color: var(--ink); }
+.chip[aria-pressed="true"]::before { content: "✓ "; color: var(--primary); }
+.q { margin: var(--s-lg) 0 var(--s-xs); font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- 폼 ---------- */
+.field label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--body); }
+.input { width: 100%; height: 40px; padding: 10px 14px; border-radius: var(--r-md); border: 1px solid var(--hairline); background: var(--surface-card); color: var(--ink); font: 400 16px/1.2 var(--font); }
+.input::placeholder { color: var(--muted-soft); }
+.input:focus, .input.is-focus { outline: none; border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.input:disabled { color: var(--muted-soft); background: var(--surface-soft); }
+.field.is-error .input { border-color: var(--error); box-shadow: inset 0 0 0 1px var(--error); }
+.helper { margin-top: 6px; font-size: 13px; color: var(--muted); }
+.field.is-error .helper { color: var(--error); }
+.input-lg { height: 48px; }
+
+/* ---------- 데이터 표현 ---------- */
+.bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--s-xs); align-items: end; height: 160px; }
+.bars div { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; height: 100%; }
+.bars i { width: 100%; background: var(--hairline-strong); border-radius: var(--r-xs) var(--r-xs) 0 0; }
+.bars i.hi { background: var(--primary); }
+.bars span { font-size: 12px; color: var(--muted); }
+.bars b { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--body); }
+.compare-row { display: grid; grid-template-columns: 96px 1fr 56px; gap: var(--s-sm); align-items: center; padding: 10px 0; border-bottom: 1px solid var(--hairline); font-size: 14px; }
+.compare-row:last-child { border-bottom: 0; }
+.track { height: 8px; background: var(--surface-elevated); border-radius: var(--r-pill); position: relative; }
+.track i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--r-pill); background: var(--muted); }
+.track i.me { background: var(--primary); }
+.compare-row .v { font-family: var(--mono); font-size: 13px; text-align: right; color: var(--ink); }
+
+/* ---------- 달력 ---------- */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-grid .dow { padding: 4px 0; text-align: center; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(--muted); }
+.day { aspect-ratio: 1 / 1; border-radius: var(--r-sm); border: 1px solid transparent; background: var(--surface-elevated); color: var(--body); font: 500 13px/1 var(--mono); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
+.day .m { font-size: 11px; line-height: 1; }
+.day.good { background: var(--ink); color: var(--on-primary); }
+.day.normal { background: var(--surface-elevated); color: var(--ink); box-shadow: inset 0 0 0 1px var(--muted); }
+.day.bad { background: var(--surface-soft); color: var(--muted); box-shadow: inset 0 0 0 1px var(--hairline-strong); }
+.day.empty { visibility: hidden; }
+.day.future { background: transparent; color: var(--muted-soft); border: 1px dashed var(--hairline); cursor: default; }
+.day.selected { outline: 2px solid var(--primary); outline-offset: 1px; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s-md); margin-top: var(--s-md); font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.lg { width: 14px; height: 14px; border-radius: 3px; }
+
+/* ---------- 알림 ---------- */
+.notice { display: flex; gap: var(--s-sm); padding: var(--s-md) var(--s-lg); border-radius: var(--r-lg); background: var(--surface-card); border-left: 3px solid var(--info); }
+.notice p { margin: 4px 0 0; font-size: 14px; }
+.notice.warn { border-left-color: var(--warning); }
+.notice.err { border-left-color: var(--error); }
+.notice.ok { border-left-color: var(--success); }
+.notice .ico { flex: none; font-family: var(--mono); font-weight: 500; }
+
+/* ---------- 요금 ---------- */
+.price { font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 1.2; }
+.plan ul { list-style: none; margin: var(--s-lg) 0; padding: 0; font-size: 14px; }
+.plan li { padding: 6px 0; }
+.plan li::before { content: "→ "; color: var(--primary); font-family: var(--mono); }
+.card-yellow.plan li::before { color: var(--on-primary); }
+
+/* ---------- CTA 밴드 ---------- */
+.cta-band { background: var(--primary); color: var(--on-primary); border-radius: var(--r-lg); padding: 64px; display: flex; justify-content: space-between; align-items: center; gap: var(--s-xl); flex-wrap: wrap; }
+.cta-band h2 { margin: 0; color: var(--on-primary); font-size: 40px; font-weight: 700; letter-spacing: -1.5px; line-height: 1.15; }
+
+/* ---------- 모바일 목업 ---------- */
+.phone { width: 300px; height: 560px; flex: none; border: 1px solid var(--hairline-strong); border-radius: 36px; background: var(--canvas); position: relative; overflow: hidden; }
+.phone .content { padding: var(--s-lg) var(--s-md); }
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); padding: 10px 0 16px; border-top: 1px solid var(--hairline); background: var(--canvas); }
+.tabbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; font-weight: 600; color: var(--muted); text-decoration: none; }
+.tabbar a .ico { font-size: 18px; font-family: var(--mono); }
+.tabbar a[aria-current="page"] { color: var(--primary); }
+.sticky-cta { position: absolute; left: var(--s-md); right: var(--s-md); bottom: 76px; }
+
+/* ---------- Do / Don't ---------- */
+.dd { border: 1px solid var(--hairline); border-radius: var(--r-lg); overflow: hidden; }
+.dd .stage { min-height: 128px; padding: var(--s-lg); display: grid; place-items: center; background: var(--surface-soft); }
+.dd .cap { padding: var(--s-md) var(--s-lg); font-size: 14px; }
+.dd .cap b { display: block; margin-bottom: 2px; color: var(--ink); }
+.dd.dont .cap b { color: var(--error); }
+
+.toast { position: fixed; left: 50%; bottom: 32px; transform: translate(-50%, 20px); opacity: 0; padding: 10px 16px; border-radius: var(--r-md); background: var(--primary); color: var(--on-primary); font-size: 14px; font-weight: 600; transition: .2s; pointer-events: none; z-index: 50; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+footer { border-top: 1px solid var(--hairline); padding: 64px 0; color: var(--muted); font-size: 14px; }
+footer .cols { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: var(--s-xl); }
+footer a { display: block; color: var(--muted); text-decoration: none; padding: 4px 0; }
+footer a:hover { color: var(--ink); }
+footer h4 { margin: 0 0 var(--s-xs); font-size: 14px; font-weight: 600; }
+
+/* ---------- 반응형 (ClickHouse 브레이크포인트) ---------- */
+@media (max-width: 1024px) {
+  .g3, .g4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .t-xl { font-size: 56px; letter-spacing: -2px; }
+}
+@media (max-width: 768px) {
+  .wrap, .topnav .inner { padding: 0 var(--s-md); }
+  .navlinks, .nav-right .btn-text { display: none; }
+  .topnav .inner { justify-content: space-between; }
+  section, .hero { padding: 64px 0; }
+  .hero .wrap, .section-head { grid-template-columns: 1fr; }
+  .g2, .g3, .g4 { grid-template-columns: 1fr; }
+  .t-xl { font-size: 36px; letter-spacing: -1px; }
+  .t-lg { font-size: 36px; letter-spacing: -1px; }
+  .t-md, .section-head h2, .cta-band h2 { font-size: 30px; letter-spacing: -1px; }
+  .t-stat { font-size: 40px; }
+  .stats { gap: var(--s-md); }
+  .cta-band { padding: var(--s-xl); }
+  footer .cols { grid-template-columns: 1fr 1fr; }
+  .phones { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="inner">
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><i style="height:20px"></i><i style="height:20px"></i><i style="height:20px"></i><i style="height:8px"></i></span>하루한장</a>
+    <nav class="navlinks" aria-label="가이드 구역">
+      <a href="#color">파운데이션</a>
+      <a href="#buttons">컴포넌트</a>
+      <a href="#record">화면 패턴</a>
+      <a href="#tokens">토큰</a>
+    </nav>
+    <div class="nav-right">
+      <span class="badge badge-line">v0.1</span>
+      <a class="btn btn-primary" href="#tokens">토큰 복사</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO: 7/5 분할 — 왼쪽 헤드라인, 오른쪽 코드 윈도우 -->
+<div class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <span class="badge badge-yellow">Style Guide · 01</span>
+      <h1 class="t-xl">하루 장사,<br>한 장의 데이터로</h1>
+      <p>검정 캔버스, 흰 글씨, 그리고 전기처럼 쨍한 노랑 하나. ClickHouse 디자인 시스템의 고대비 문법으로, 사장님의 기록이 <b style="color:var(--ink)">숫자로 쌓이는 경험</b>을 보여 주는 스타일가이드입니다.</p>
+      <div class="stack">
+        <a class="btn btn-primary btn-lg" href="#record">기록 화면 보기</a>
+        <a class="btn btn-secondary btn-lg" href="#color">토큰부터 보기</a>
+      </div>
+      <div class="stats">
+        <div><div class="t-stat">30s</div><div class="t-caption">하루 기록 시간</div></div>
+        <div><div class="t-stat">3</div><div class="t-caption">입력 항목</div></div>
+        <div><div class="t-stat">0</div><div class="t-caption">AI 사용 · 기기 내 분석</div></div>
+      </div>
+    </div>
+    <div class="code-win" aria-label="지역·업종 익명 비교 쿼리 예시">
+      <div class="code-bar"><i></i><i></i><i></i><span>compare_region.sql</span></div>
+<pre><span class="ln"><span class="cm">-- UC5 같은 지역·업종 익명 비교</span></span><span class="ln"><span class="kw">SELECT</span> weekday,</span><span class="ln">  <span class="fn">avg</span>(mood = <span class="str">'good'</span>) <span class="kw">AS</span> good_ratio,</span><span class="ln">  <span class="fn">uniq</span>(store_id)      <span class="kw">AS</span> stores</span><span class="ln"><span class="kw">FROM</span> daily_record</span><span class="ln"><span class="kw">WHERE</span> region = <span class="str">'마포구 망원동'</span></span><span class="ln">  <span class="kw">AND</span> industry = <span class="str">'분식'</span></span><span class="ln">  <span class="kw">AND</span> day &gt;= <span class="fn">today</span>() - <span class="num">28</span></span><span class="ln"><span class="kw">GROUP BY</span> weekday</span><span class="ln"><span class="kw">HAVING</span> stores &gt;= <span class="num">5</span>  <span class="cm">-- k-익명성</span></span></pre>
+      <div class="code-status"><span><b>●</b> 7 rows · 23 stores</span><span>0.004 sec</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 1. 원칙 -->
+<section id="principles">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">01 · Principles</span><h2>디자인 원칙</h2></div>
+      <p>ClickHouse의 「노랑은 드물게, 숫자는 크게, 코드는 그대로」 원칙을 하루한장의 장벽(기록 중단, 디지털 어려움, 결과 오해)에 맞춰 옮겼습니다.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card"><span class="t-eyebrow yellow">P1</span><h4 class="t-title-md" style="margin:8px 0">노랑은 행동과 숫자에만</h4><p class="t-body-sm" style="margin:0">주 버튼, 핵심 지표 숫자, 노랑 CTA 밴드에만 씁니다. 본문 글씨나 넓은 배경에는 쓰지 않습니다.</p></div>
+      <div class="card"><span class="t-eyebrow yellow">P2</span><h4 class="t-title-md" style="margin:8px 0">숫자가 먼저 말한다</h4><p class="t-body-sm" style="margin:0">「좋은 날 78%」처럼 숫자를 56px 노랑으로 크게 보여 주고, 설명은 아래에 작게 붙입니다.</p></div>
+      <div class="card"><span class="t-eyebrow yellow">P3</span><h4 class="t-title-md" style="margin:8px 0">그림자 없는 깊이</h4><p class="t-body-sm" style="margin:0">그림자를 쓰지 않습니다. 검정 캔버스와 한 톤 밝은 카드(#1a1a1a)의 차이만으로 층을 나눕니다.</p></div>
+      <div class="card-yellow"><span class="t-eyebrow">P4</span><h4 class="t-title-md" style="margin:8px 0">한 밴드에 하나의 서피스</h4><p class="t-body-sm" style="margin:0">검정 → 카드 → 노랑 → 검정 순서로 바꾸며 같은 서피스를 연달아 두지 않습니다.</p></div>
+      <div class="card"><span class="t-eyebrow yellow">P5</span><h4 class="t-title-md" style="margin:8px 0">사장님 손가락 크기</h4><p class="t-body-sm" style="margin:0">원본 버튼은 40px이지만 기록·저장 버튼은 56px, 선택 버튼은 72px로 키웁니다.</p></div>
+      <div class="card"><span class="t-eyebrow yellow">P6</span><h4 class="t-title-md" style="margin:8px 0">단정하지 않는 숫자</h4><p class="t-body-sm" style="margin:0">숫자 옆에 표본 수와 신뢰도를 항상 함께 둡니다. 「경향」과 「참고」로 말합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. 컬러 -->
+<section id="color" class="band-soft">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">02 · Color</span><h2>컬러</h2></div>
+      <p>모노크롬에 노랑 하나를 더한 팔레트입니다. 다크 전용이며, 견본을 누르면 HEX 값이 복사됩니다.</p>
+    </div>
+
+    <h3 class="first">브랜드</h3>
+    <div class="grid g4">
+      <button class="swatch" data-hex="#faff69"><div class="chip" style="background:#faff69"></div><div class="info"><div class="name">primary · Electric Yellow</div><div class="hex">#faff69</div><div class="use">주 버튼, 지표 숫자, CTA 밴드</div></div></button>
+      <button class="swatch" data-hex="#e6eb52"><div class="chip" style="background:#e6eb52"></div><div class="info"><div class="name">primary-active</div><div class="hex">#e6eb52</div><div class="use">누르는 동안</div></div></button>
+      <button class="swatch" data-hex="#3a3a1f"><div class="chip" style="background:#3a3a1f"></div><div class="info"><div class="name">primary-disabled</div><div class="hex">#3a3a1f</div><div class="use">비활성 주 버튼</div></div></button>
+      <button class="swatch" data-hex="#0a0a0a"><div class="chip" style="background:#0a0a0a;border-bottom:1px solid var(--hairline)"></div><div class="info"><div class="name">on-primary</div><div class="hex">#0a0a0a</div><div class="use">노랑 위의 검정 글씨</div></div></button>
+    </div>
+
+    <h3>서피스 · 선</h3>
+    <div class="grid g4">
+      <button class="swatch" data-hex="#0a0a0a"><div class="chip" style="background:#0a0a0a;border-bottom:1px solid var(--hairline)"></div><div class="info"><div class="name">canvas</div><div class="hex">#0a0a0a</div><div class="use">모든 화면의 바탕</div></div></button>
+      <button class="swatch" data-hex="#121212"><div class="chip" style="background:#121212"></div><div class="info"><div class="name">surface-soft</div><div class="hex">#121212</div><div class="use">교차 밴드, 탭 트랙</div></div></button>
+      <button class="swatch" data-hex="#1a1a1a"><div class="chip" style="background:#1a1a1a"></div><div class="info"><div class="name">surface-card</div><div class="hex">#1a1a1a</div><div class="use">카드, 입력창, 코드 창</div></div></button>
+      <button class="swatch" data-hex="#242424"><div class="chip" style="background:#242424"></div><div class="info"><div class="name">surface-elevated</div><div class="hex">#242424</div><div class="use">카드 안의 카드, 선택 버튼</div></div></button>
+      <button class="swatch" data-hex="#2a2a2a"><div class="chip" style="background:#2a2a2a"></div><div class="info"><div class="name">hairline</div><div class="hex">#2a2a2a</div><div class="use">카드 1px 테두리, 구분선</div></div></button>
+      <button class="swatch" data-hex="#3a3a3a"><div class="chip" style="background:#3a3a3a"></div><div class="info"><div class="name">hairline-strong</div><div class="hex">#3a3a3a</div><div class="use">강조 테두리, 입력 외곽</div></div></button>
+    </div>
+
+    <h3>텍스트</h3>
+    <div class="grid g4">
+      <button class="swatch" data-hex="#ffffff"><div class="chip" style="background:#ffffff"></div><div class="info"><div class="name">ink</div><div class="hex">#ffffff</div><div class="use">제목, 주요 텍스트</div></div></button>
+      <button class="swatch" data-hex="#e6e6e6"><div class="chip" style="background:#e6e6e6"></div><div class="info"><div class="name">body-strong</div><div class="hex">#e6e6e6</div><div class="use">강조 문단</div></div></button>
+      <button class="swatch" data-hex="#cccccc"><div class="chip" style="background:#cccccc"></div><div class="info"><div class="name">body</div><div class="hex">#cccccc</div><div class="use">기본 본문, 분석 문장</div></div></button>
+      <button class="swatch" data-hex="#888888"><div class="chip" style="background:#888888"></div><div class="info"><div class="name">muted</div><div class="hex">#888888</div><div class="use">라벨, 캡션, 출처</div></div></button>
+    </div>
+
+    <h3>시맨틱 <span class="muted t-body-sm" style="font-weight:400">— 상태 표시에만, 브랜드 색으로 쓰지 않음</span></h3>
+    <div class="grid g4">
+      <button class="swatch" data-hex="#22c55e"><div class="chip" style="background:#22c55e"></div><div class="info"><div class="name">success</div><div class="hex">#22c55e</div><div class="use">저장 완료, 연동 정상</div></div></button>
+      <button class="swatch" data-hex="#f59e0b"><div class="chip" style="background:#f59e0b"></div><div class="info"><div class="name">warning</div><div class="hex">#f59e0b</div><div class="use">기록 부족, 신뢰도 낮음</div></div></button>
+      <button class="swatch" data-hex="#ef4444"><div class="chip" style="background:#ef4444"></div><div class="info"><div class="name">error</div><div class="hex">#ef4444</div><div class="use">입력 오류, 매출하락 경보</div></div></button>
+      <button class="swatch" data-hex="#3b82f6"><div class="chip" style="background:#3b82f6"></div><div class="info"><div class="name">info</div><div class="hex">#3b82f6</div><div class="use">안내, 코드 하이라이트</div></div></button>
+    </div>
+
+    <h3>사용 비율</h3>
+    <div class="ratio-bar" role="img" aria-label="캔버스 65%, 카드 서피스 25%, 흰 글씨 7%, 노랑 3%">
+      <span style="flex:65;background:var(--canvas);color:var(--muted)">canvas 65%</span>
+      <span style="flex:25;background:var(--surface-card);color:var(--muted)">card 25%</span>
+      <span style="flex:7;background:var(--ink);color:var(--on-primary)">7%</span>
+      <span style="flex:3;background:var(--primary)"></span>
+    </div>
+  </div>
+</section>
+
+<!-- 3. 타이포 -->
+<section id="type">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">03 · Typography</span><h2>타이포그래피</h2></div>
+      <p>Inter 하나로 전체 위계를 만들고, 한글은 Pretendard가 받칩니다. 제목은 모두 700에 자간을 좁히고, 숫자와 코드는 JetBrains Mono를 씁니다.</p>
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:150px">토큰</th><th>예시</th><th style="width:170px">크기 / 굵기 / 자간</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">display-xl</td><td><span class="t-xl" style="font-size:clamp(36px,6vw,72px)">한 장의 기록</span></td><td class="mono">72 / 700 / -2.5</td></tr>
+        <tr><td class="mono">display-lg</td><td><span class="t-lg" style="font-size:clamp(32px,4.6vw,56px)">요일별 장사 패턴</span></td><td class="mono">56 / 700 / -2</td></tr>
+        <tr><td class="mono">display-md</td><td><span class="t-md" style="font-size:clamp(28px,3.4vw,40px)">같은 동네와 비교</span></td><td class="mono">40 / 700 / -1.5</td></tr>
+        <tr><td class="mono">display-sm</td><td><span class="t-sm">월 4,900원</span></td><td class="mono">32 / 700 / -1</td></tr>
+        <tr><td class="mono">stat-display</td><td><span class="t-stat">78%</span> <span class="muted t-body-sm">항상 노랑</span></td><td class="mono">56 / 700 / -1.5</td></tr>
+        <tr><td class="mono">title-lg</td><td><span class="t-title-lg">상세보고서</span></td><td class="mono">24 / 700 / -0.3</td></tr>
+        <tr><td class="mono">title-md</td><td><span class="t-title-md">오늘 장사는 어땠나요?</span></td><td class="mono">18 / 600 / 0</td></tr>
+        <tr><td class="mono">title-sm</td><td><span class="t-title-sm">기록 설정</span></td><td class="mono">16 / 600 / 0</td></tr>
+        <tr><td class="mono">body-md</td><td><span class="t-body-md">최근 8주 기록을 보면 금요일에 손님이 많은 경향이 있어요.</span></td><td class="mono">16 / 400 / 0</td></tr>
+        <tr><td class="mono">body-sm</td><td><span class="t-body-sm">10월 2일 (목) · 맑음 18°C</span></td><td class="mono">14 / 400 / 0</td></tr>
+        <tr><td class="mono">caption</td><td><span class="t-caption">익명 23곳 기준</span></td><td class="mono">13 / 500 / 0</td></tr>
+        <tr><td class="mono">caption-upper</td><td><span class="t-eyebrow">New · Report</span></td><td class="mono">12 / 600 / 1.5</td></tr>
+        <tr><td class="mono">code</td><td><span class="t-code">good_ratio = 0.78</span></td><td class="mono">14 / 400 / 0</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="notice" style="margin-top:var(--s-lg)"><span class="ico yellow">i</span><div><b style="color:var(--ink)">한글 적용 규칙</b><p>영문 기준 자간(-2.5px)을 한글에 그대로 쓰면 글자가 붙어 보입니다. 모바일에서는 제목 자간을 -1px까지만 줍니다. 사장님 화면의 본문은 16px 미만으로 내리지 않습니다.</p></div></div>
+  </div>
+</section>
+
+<!-- 4. 간격 · 라운드 · 깊이 -->
+<section id="space" class="band-soft">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">04 · Layout</span><h2>간격 · 라운드 · 깊이</h2></div>
+      <p>4px 단위입니다. 큰 밴드 사이는 96px, 카드 안쪽 여백은 32px(기능 카드)과 24px(코드·이벤트 카드)을 씁니다.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card">
+        <span class="label">Spacing</span>
+        <div class="space-row"><span class="tok">xxs</span><span class="px">4</span><span class="bar" style="width:4px"></span></div>
+        <div class="space-row"><span class="tok">xs</span><span class="px">8</span><span class="bar" style="width:8px"></span></div>
+        <div class="space-row"><span class="tok">sm</span><span class="px">12</span><span class="bar" style="width:12px"></span></div>
+        <div class="space-row"><span class="tok">md</span><span class="px">16</span><span class="bar" style="width:16px"></span></div>
+        <div class="space-row"><span class="tok">lg</span><span class="px">24</span><span class="bar" style="width:24px"></span></div>
+        <div class="space-row"><span class="tok">xl</span><span class="px">32</span><span class="bar" style="width:32px"></span></div>
+        <div class="space-row"><span class="tok">xxl</span><span class="px">48</span><span class="bar" style="width:48px"></span></div>
+        <div class="space-row"><span class="tok">section</span><span class="px">96</span><span class="bar" style="width:96px"></span></div>
+      </div>
+      <div class="card">
+        <span class="label">Radius</span>
+        <div class="grid g3" style="gap:12px">
+          <div><div class="radius-box" style="border-radius:4px"></div><p class="t-caption muted">xs 4 · 배지 장식</p></div>
+          <div><div class="radius-box" style="border-radius:6px"></div><p class="t-caption muted">sm 6 · 작은 버튼, 탭</p></div>
+          <div><div class="radius-box" style="border-radius:8px"></div><p class="t-caption muted">md 8 · 버튼, 입력창</p></div>
+          <div><div class="radius-box" style="border-radius:12px"></div><p class="t-caption muted">lg 12 · 카드</p></div>
+          <div><div class="radius-box" style="border-radius:9999px"></div><p class="t-caption muted">pill · 배지만</p></div>
+          <div><div class="radius-box" style="border-radius:50%;aspect-ratio:1;height:auto;width:72px"></div><p class="t-caption muted">full · 아이콘</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="label">Depth — 그림자 없음</span>
+        <div style="background:var(--canvas);padding:12px;border-radius:8px;margin-bottom:8px" class="t-caption">Flat · canvas</div>
+        <div style="border:1px solid var(--hairline);padding:12px;border-radius:8px;margin-bottom:8px" class="t-caption">Soft hairline · 1px #2a2a2a</div>
+        <div style="background:var(--surface-elevated);padding:12px;border-radius:8px;margin-bottom:8px" class="t-caption">Surface card · 배경 톤으로만</div>
+        <div style="background:var(--primary);color:var(--on-primary);padding:12px;border-radius:8px" class="t-caption">Yellow band · 강조</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. 버튼 · 배지 · 탭 -->
+<section id="buttons">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">05 · Controls</span><h2>버튼 · 배지 · 탭</h2></div>
+      <p>노랑 바탕에 검정 글씨인 버튼이 브랜드의 행동 신호입니다. 버튼 라운드는 8px로 두고, 알약 모양은 배지에만 씁니다.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <span class="label">Buttons</span>
+        <div class="stack"><button class="btn btn-primary">기록 저장</button><button class="btn btn-secondary">나중에</button><button class="btn btn-text">자세히 →</button><button class="icon-btn" aria-label="공유">↗</button></div>
+        <h3>상태</h3>
+        <div class="stack">
+          <button class="btn btn-primary">Default</button>
+          <button class="btn btn-primary is-active">Active</button>
+          <button class="btn btn-primary" disabled title="오늘장사를 먼저 골라 주세요">Disabled</button>
+          <button class="btn btn-secondary" disabled>Disabled</button>
+        </div>
+        <h3>사장님용 확대 버튼</h3>
+        <button class="btn btn-primary btn-lg btn-block">오늘 기록 저장 · 56px</button>
+      </div>
+      <div class="card">
+        <span class="label">Badges</span>
+        <div class="stack">
+          <span class="badge badge-yellow">New</span>
+          <span class="badge">신뢰도 높음</span>
+          <span class="badge badge-line">기록 부족 · 참고만</span>
+          <span class="badge"><span class="dot" style="background:var(--success)"></span>날씨 연동 정상</span>
+          <span class="badge"><span class="dot" style="background:var(--warning)"></span>표본 5곳</span>
+        </div>
+        <h3>Category tabs</h3>
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true">전체</button>
+          <button class="tab" role="tab" aria-selected="false">날씨별</button>
+          <button class="tab" role="tab" aria-selected="false">요일별</button>
+          <button class="tab" role="tab" aria-selected="false">이벤트별</button>
+        </div>
+        <h3>Inputs</h3>
+        <div class="grid g2">
+          <div class="field"><label for="i1">가게 이름</label><input id="i1" class="input" placeholder="예) 하루분식"></div>
+          <div class="field"><label for="i2">업종 · focus</label><input id="i2" class="input is-focus" value="분식"></div>
+          <div class="field is-error"><label for="i3">휴대폰 번호</label><input id="i3" class="input" value="010-12"><div class="helper">번호를 끝까지 입력해 주세요</div></div>
+          <div class="field"><label for="i4">지역 (자동)</label><input id="i4" class="input" value="마포구 망원동" disabled></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. 기록 입력 -->
+<section id="record" class="band-soft">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">06 · UC2 Record</span><h2>30초 기록 입력</h2></div>
+      <p>선택하면 흰색으로 반전됩니다. 노랑은 저장 버튼에만 둬서 시선이 마지막 행동으로 모이게 합니다. 좋음/보통/나쁨은 기호(▲ ■ ▼)로도 구분합니다.</p>
+    </div>
+    <div class="grid g2" style="align-items:start">
+      <div class="card">
+        <div class="t-title-md">오늘 장사는 어땠나요?</div>
+        <div class="t-body-sm muted">10월 2일 (목) · 맑음 18°C · 자동 입력</div>
+        <div class="q">오늘장사</div>
+        <div class="choice-group" data-single>
+          <button class="choice" aria-pressed="true"><span class="sym">▲</span>좋음</button>
+          <button class="choice" aria-pressed="false"><span class="sym">■</span>보통</button>
+          <button class="choice" aria-pressed="false"><span class="sym">▼</span>나쁨</button>
+        </div>
+        <div class="q">손님 수</div>
+        <div class="choice-group" data-single>
+          <button class="choice" aria-pressed="false">많음</button>
+          <button class="choice" aria-pressed="true">평소</button>
+          <button class="choice" aria-pressed="false">적음</button>
+        </div>
+        <div class="q">특별한 일 · 여러 개</div>
+        <div class="chip-row" data-multi>
+          <button class="chip" aria-pressed="false">비</button>
+          <button class="chip" aria-pressed="true">할인행사</button>
+          <button class="chip" aria-pressed="false">신메뉴</button>
+          <button class="chip" aria-pressed="true">SNS 게시</button>
+          <button class="chip" aria-pressed="false">단체손님</button>
+          <button class="chip" aria-pressed="false">+ 직접</button>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" style="margin-top:var(--s-lg)">오늘 기록 저장</button>
+      </div>
+      <div>
+        <div class="code-win">
+          <div class="code-bar"><i></i><i></i><i></i><span>record · 저장되는 데이터</span></div>
+<pre><span class="ln">{</span><span class="ln">  <span class="str">"day"</span>: <span class="str">"2026-10-02"</span>,</span><span class="ln">  <span class="str">"mood"</span>: <span class="str">"good"</span>,</span><span class="ln">  <span class="str">"guests"</span>: <span class="str">"normal"</span>,</span><span class="ln">  <span class="str">"events"</span>: [<span class="str">"discount"</span>, <span class="str">"sns"</span>],</span><span class="ln">  <span class="str">"weather"</span>: { <span class="str">"sky"</span>: <span class="str">"clear"</span>, <span class="str">"temp"</span>: <span class="num">18</span> },</span><span class="ln">  <span class="str">"sales_band"</span>: <span class="kw">null</span>  <span class="cm">// 선택 입력</span></span><span class="ln">}</span></pre>
+          <div class="code-status"><span><b>●</b> 기기에 저장됨</span><span>3 taps · 21s</span></div>
+        </div>
+        <p class="t-body-sm muted" style="margin-top:var(--s-md)">ClickHouse가 마케팅 그림 대신 실제 쿼리를 보여 주듯, 하루한장도 「무엇이 저장되는지」를 그대로 보여 줘 개인정보 걱정을 덜어 줍니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. 데이터 표현 -->
+<section id="data">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">07 · UC3 · UC5 Insight</span><h2>지표 · 패턴 · 비교</h2></div>
+      <p>지표 숫자는 언제나 노랑 56px입니다. 그래프에서는 가장 중요한 막대 하나만 노랑이고 나머지는 회색입니다. 내 가게 막대는 노랑, 동네 평균 막대는 회색으로 칠합니다.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card">
+        <span class="label">Stat callout</span>
+        <div class="t-stat">78%</div>
+        <div class="t-title-sm" style="margin-top:12px">이번 달 좋은 날 비율</div>
+        <div class="t-body-sm muted">기록 24일 · 지난달 대비 +6%p</div>
+        <div class="grid g3" style="margin-top:var(--s-lg);gap:8px">
+          <div class="nested"><div class="t-title-sm">24</div><div class="t-caption muted">기록일</div></div>
+          <div class="nested"><div class="t-title-sm">18</div><div class="t-caption muted">▲ 좋음</div></div>
+          <div class="nested"><div class="t-title-sm">3</div><div class="t-caption muted">▼ 나쁨</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="label">요일별 좋은 날 비율 · 8주</span>
+        <div class="bars" role="img" aria-label="요일별 좋은 날 비율, 금요일 90%로 가장 높음">
+          <div><b>40</b><i style="height:40%"></i><span>월</span></div>
+          <div><b>35</b><i style="height:35%"></i><span>화</span></div>
+          <div><b>45</b><i style="height:45%"></i><span>수</span></div>
+          <div><b>50</b><i style="height:50%"></i><span>목</span></div>
+          <div><b>90</b><i class="hi" style="height:90%"></i><span>금</span></div>
+          <div><b>70</b><i style="height:70%"></i><span>토</span></div>
+          <div><b>30</b><i style="height:30%"></i><span>일</span></div>
+        </div>
+        <p class="t-body-sm" style="margin:var(--s-md) 0 0">금요일에 장사가 잘되는 <b style="color:var(--ink)">경향</b>이 있어요.</p>
+      </div>
+      <div class="card">
+        <span class="label">망원동 분식 · 익명 23곳</span>
+        <div class="compare-row"><span>우리 가게</span><span class="track"><i class="me" style="width:78%"></i></span><span class="v">78%</span></div>
+        <div class="compare-row"><span class="muted">동네 평균</span><span class="track"><i style="width:61%"></i></span><span class="v">61%</span></div>
+        <div class="compare-row"><span class="muted">상위 25%</span><span class="track"><i style="width:74%"></i></span><span class="v">74%</span></div>
+        <div class="stack" style="margin-top:var(--s-md)"><span class="badge">신뢰도 보통</span><span class="badge badge-line">참고 정보</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. 달력 · 알림 -->
+<section id="calendar" class="band-soft">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">08 · UC4 · UC6</span><h2>장사 달력 · 알림</h2></div>
+      <p>달력 칸은 GitHub 기여 그래프처럼 밝기로 상태를 보여 줍니다. 좋음은 흰색, 보통은 회색 테두리, 나쁨은 어두운 칸입니다. 선택한 날만 노랑 테두리를 두릅니다.</p>
+    </div>
+    <div class="grid g2" style="align-items:start">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-md)"><button class="icon-btn" style="background:var(--surface-elevated)" aria-label="이전 달">‹</button><span class="t-title-md">2026.09</span><button class="icon-btn" style="background:var(--surface-elevated)" aria-label="다음 달">›</button></div>
+        <div class="cal-grid" id="cal"></div>
+        <div class="legend"><span><i class="lg" style="background:var(--ink)"></i>▲ 좋음</span><span><i class="lg" style="box-shadow:inset 0 0 0 1px var(--muted);background:var(--surface-elevated)"></i>■ 보통</span><span><i class="lg" style="background:var(--surface-soft);box-shadow:inset 0 0 0 1px var(--hairline-strong)"></i>▼ 나쁨</span></div>
+      </div>
+      <div class="grid" style="gap:var(--s-sm)">
+        <div class="notice ok"><span class="ico" style="color:var(--success)">✓</span><div><b style="color:var(--ink)">오늘 기록 완료</b><p>연속 12일째 기록 중이에요.</p></div></div>
+        <div class="notice"><span class="ico" style="color:var(--info)">i</span><div><b style="color:var(--ink)">패턴 분석까지 8일</b><p>14일 이상 쌓이면 요일별 패턴을 보여 드릴게요.</p></div></div>
+        <div class="notice warn"><span class="ico" style="color:var(--warning)">!</span><div><b style="color:var(--ink)">비교 표본이 적어요</b><p>같은 동네 분식집이 5곳 이하라 업종을 넓혀 보여 드려요.</p></div></div>
+        <div class="notice err"><span class="ico" style="color:var(--error)">▼</span><div><b style="color:var(--ink)">최근 2주, 평소보다 조용했어요</b><p>「나쁨」이 5일 이어졌어요. 동네 흐름도 비슷한지 <a href="#data">비교해 보기</a></p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. 요금 (UC7) -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">09 · UC7 Pricing</span><h2>요금 카드</h2></div>
+      <p>추천 요금제는 카드 전체를 노랑으로 뒤집어 강조합니다. 노랑 면이 곧 추천 표시라 「추천」 배지를 따로 붙이지 않아도 됩니다.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card plan"><div class="t-title-lg">기본</div><div class="price" style="color:var(--ink);margin-top:8px">무료</div><ul><li>30초 일일 기록</li><li>장사 달력</li><li>요일·날씨 패턴</li></ul><button class="btn btn-secondary btn-block">지금 사용 중</button></div>
+      <div class="card-yellow plan"><div class="t-title-lg">상세보고서</div><div class="price" style="margin-top:8px">월 4,900원</div><ul><li>월간 PDF 보고서</li><li>지역·업종 상세 비교</li><li>데이터 백업·내보내기</li></ul><button class="btn btn-black btn-block">시작하기</button></div>
+      <div class="card plan"><div class="t-title-lg">기관</div><div class="price" style="color:var(--ink);margin-top:8px">문의</div><ul><li>익명 상권 대시보드</li><li>지자체·상인회 전용</li><li>분기 리포트</li></ul><button class="btn btn-secondary btn-block">도입 문의</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10. 모바일 -->
+<section id="mobile" class="band-soft">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">10 · Mobile</span><h2>모바일 패턴</h2></div>
+      <p>사장님은 휴대폰으로 씁니다. 하단 탭은 4개로 두고, 활성 탭은 노랑입니다. 기록 버튼은 탭바 바로 위에 고정합니다.</p>
+    </div>
+    <div class="stack phones" style="gap:var(--s-xxl);align-items:flex-start">
+      <div class="phone">
+        <div class="content">
+          <span class="t-eyebrow muted">10.02 THU</span>
+          <div class="t-title-lg" style="margin:6px 0 20px">사장님,<br>오늘 하루 수고하셨어요</div>
+          <div class="card card-sm" style="margin-bottom:12px"><div class="t-stat" style="font-size:44px">12<span style="font-size:20px">일</span></div><div class="t-caption muted" style="margin-top:6px">연속 기록</div></div>
+          <div class="card card-sm"><div class="t-title-sm">금요일이 가장 좋아요</div><div class="t-caption muted">좋은 날 90% · 8주</div></div>
+        </div>
+        <div class="sticky-cta"><button class="btn btn-primary btn-lg btn-block">오늘 기록하기</button></div>
+        <nav class="tabbar"><a href="#" aria-current="page"><span class="ico">⌂</span>오늘</a><a href="#"><span class="ico">▦</span>달력</a><a href="#"><span class="ico">▲</span>패턴</a><a href="#"><span class="ico">⇆</span>비교</a></nav>
+      </div>
+      <div style="flex:1;min-width:260px">
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th>구간</th><th>폭</th><th>변화</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--ink)">Mobile</td><td class="mono">&lt; 768</td><td>상단 메뉴 숨김, 히어로 72→36px, 카드 1열, 코드 창은 아래로 쌓고 가로 스크롤</td></tr>
+            <tr><td style="color:var(--ink)">Tablet</td><td class="mono">768–1024</td><td>카드 2열, 요금 2열</td></tr>
+            <tr><td style="color:var(--ink)">Desktop</td><td class="mono">1024–1440</td><td>카드 3열, 히어로 7:5 분할</td></tr>
+            <tr><td style="color:var(--ink)">Wide</td><td class="mono">&gt; 1440</td><td>최대 폭 1280px</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="t-body-sm muted" style="margin-top:var(--s-md)">터치 영역은 원본 기준 최소 40px이지만, 하루한장은 48px 이상(주요 행동 56px)으로 올립니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. Do / Don't -->
+<section id="dodont">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">11 · Rules</span><h2>Do / Don't</h2></div>
+      <p>DESIGN-clickhouse.md의 Do's and Don'ts를 하루한장 화면에 맞게 옮겼습니다.</p>
+    </div>
+    <div class="grid g4">
+      <div class="dd"><div class="stage"><span class="t-stat">78%</span></div><div class="cap"><b>✓ Do</b>지표 숫자는 노랑 + 700 + 크게</div></div>
+      <div class="dd dont"><div class="stage"><p style="margin:0;color:var(--primary);font-size:14px">노랑으로 쓴 긴 본문 문장은 눈이 아프고 강조가 사라집니다</p></div><div class="cap"><b>✕ Don't</b>노랑을 본문 글씨에 쓰지 않기</div></div>
+      <div class="dd"><div class="stage"><button class="btn btn-primary">저장</button></div><div class="cap"><b>✓ Do</b>버튼 라운드 8px</div></div>
+      <div class="dd dont"><div class="stage"><button class="btn btn-primary" style="border-radius:9999px">저장</button></div><div class="cap"><b>✕ Don't</b>알약 모양 버튼 (배지에만 허용)</div></div>
+      <div class="dd"><div class="stage"><div class="card card-sm" style="width:100%">카드는 톤 차이로</div></div><div class="cap"><b>✓ Do</b>깊이는 배경 톤으로 표현</div></div>
+      <div class="dd dont"><div class="stage"><div style="background:#1a1a1a;padding:16px;border-radius:12px;box-shadow:0 12px 40px rgba(250,255,105,.35)">노랑 글로우 그림자</div></div><div class="cap"><b>✕ Don't</b>그림자·글로우 추가</div></div>
+      <div class="dd"><div class="stage"><div class="stack"><span class="badge"><span class="dot" style="background:var(--success)"></span>정상</span><span class="badge"><span class="dot" style="background:var(--error)"></span>경보</span></div></div><div class="cap"><b>✓ Do</b>초록·빨강은 작은 상태 점에만</div></div>
+      <div class="dd dont"><div class="stage"><button class="btn" style="background:#3b82f6;color:#fff">파란 버튼</button></div><div class="cap"><b>✕ Don't</b>두 번째 브랜드 색 도입</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12. 토큰 + CTA 밴드 -->
+<section id="tokens" class="band-soft">
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="t-eyebrow yellow">12 · Tokens</span><h2>토큰 코드</h2></div>
+      <p>구현할 때 그대로 복사해 쓰는 CSS 변수입니다. 원본은 프로젝트 루트의 <code>DESIGN-clickhouse.md</code>에 있습니다.</p>
+    </div>
+    <div class="code-win">
+      <div class="code-bar"><i></i><i></i><i></i><span>tokens.css</span><span style="margin-left:auto"><button class="btn btn-secondary" id="copyTokens" style="height:28px;padding:0 10px;font-size:12px">복사</button></span></div>
+<pre id="tokenCode">:root {
+  /* color */
+  --primary: #faff69;  --primary-active: #e6eb52;  --primary-disabled: #3a3a1f;
+  --canvas: #0a0a0a;   --surface-soft: #121212;
+  --surface-card: #1a1a1a;  --surface-elevated: #242424;
+  --hairline: #2a2a2a; --hairline-strong: #3a3a3a;
+  --ink: #ffffff;  --body-strong: #e6e6e6;  --body: #cccccc;
+  --muted: #888888;  --muted-soft: #5a5a5a;  --on-primary: #0a0a0a;
+  --success: #22c55e;  --warning: #f59e0b;  --error: #ef4444;  --info: #3b82f6;
+
+  /* type */
+  --font: Inter, 'Pretendard Variable', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* radius */
+  --r-xs: 4px;  --r-sm: 6px;  --r-md: 8px;  --r-lg: 12px;  --r-pill: 9999px;
+
+  /* spacing */
+  --s-xxs: 4px; --s-xs: 8px; --s-sm: 12px; --s-md: 16px;
+  --s-lg: 24px; --s-xl: 32px; --s-xxl: 48px; --s-section: 96px;
+
+  /* elevation: 그림자 없음 — 배경 톤 차이로만 */
+}</pre>
+    </div>
+
+    <div class="cta-band" style="margin-top:var(--s-section)">
+      <div><span class="t-eyebrow">Ready</span><h2>장사는 매일,<br>정리는 하루한장</h2></div>
+      <a class="btn btn-black btn-lg" href="#top">처음으로</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap cols">
+    <div><a class="brand" href="#top" style="padding:0;margin-bottom:12px"><span class="brand-mark" aria-hidden="true"><i style="height:20px"></i><i style="height:20px"></i><i style="height:20px"></i><i style="height:8px"></i></span>하루한장</a><p style="margin:0">스타일가이드-1 · v0.1 · 2026-10-02<br>참조: npx getdesign@latest add clickhouse</p></div>
+    <div><h4>파운데이션</h4><a href="#color">컬러</a><a href="#type">타이포</a><a href="#space">간격</a></div>
+    <div><h4>컴포넌트</h4><a href="#buttons">버튼</a><a href="#record">기록 입력</a><a href="#data">지표</a></div>
+    <div><h4>패턴</h4><a href="#calendar">달력</a><a href="#pricing">요금</a><a href="#mobile">모바일</a></div>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var toast = document.getElementById('toast'), timer;
+  function show(msg) {
+    toast.textContent = msg; toast.classList.add('show');
+    clearTimeout(timer); timer = setTimeout(function () { toast.classList.remove('show'); }, 1400);
+  }
+  function copy(text, msg) {
+    try { navigator.clipboard.writeText(text).then(function () { show(msg); }, function () { show(text); }); }
+    catch (e) { show(text); }
+  }
+  document.querySelectorAll('.swatch').forEach(function (el) {
+    el.addEventListener('click', function () { copy(el.dataset.hex, el.dataset.hex + ' 복사됨'); });
+  });
+  document.getElementById('copyTokens').addEventListener('click', function () {
+    copy(document.getElementById('tokenCode').textContent, '토큰 코드 복사됨');
+  });
+
+  document.querySelectorAll('[data-single]').forEach(function (g) {
+    g.addEventListener('click', function (e) {
+      var b = e.target.closest('.choice'); if (!b) return;
+      g.querySelectorAll('.choice').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+    });
+  });
+  document.querySelectorAll('[data-multi]').forEach(function (g) {
+    g.addEventListener('click', function (e) {
+      var b = e.target.closest('.chip'); if (!b) return;
+      b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true');
+    });
+  });
+  document.querySelectorAll('[role="tablist"]').forEach(function (g) {
+    g.addEventListener('click', function (e) {
+      var b = e.target.closest('[role="tab"]'); if (!b) return;
+      g.querySelectorAll('[role="tab"]').forEach(function (x) { x.setAttribute('aria-selected', x === b); });
+    });
+  });
+
+  // 달력 — 2026년 9월 (1일 = 화요일), 예시 기록
+  var cal = document.getElementById('cal');
+  var pat = 'gnbnggnngbnnggbbnnggnggbgnngnn';
+  var map = { g: 'good', n: 'normal', b: 'bad' };
+  var sym = { good: '▲', normal: '■', bad: '▼' };
+  var html = ['SUN','MON','TUE','WED','THU','FRI','SAT'].map(function (d) { return '<div class="dow">' + d + '</div>'; }).join('');
+  for (var i = 0; i < 2; i++) html += '<span class="day empty"></span>';
+  for (var d = 1; d <= 30; d++) {
+    var s = map[pat[d - 1]], cls = 'day ' + s + (d === 26 ? ' selected' : '');
+    html += '<button class="' + cls + '" aria-label="9월 ' + d + '일 ' + s + '">' + d + '<span class="m">' + sym[s] + '</span></button>';
+  }
+  cal.innerHTML = html;
+  cal.addEventListener('click', function (e) {
+    var b = e.target.closest('.day'); if (!b || b.classList.contains('future') || b.classList.contains('empty')) return;
+    cal.querySelectorAll('.day.selected').forEach(function (x) { x.classList.remove('selected'); });
+    b.classList.add('selected');
+  });
+})();
+</script>
+</body>
+</html>
